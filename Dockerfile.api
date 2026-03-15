@@ -1,0 +1,28 @@
+FROM python:3.12-slim
+
+WORKDIR /app
+
+# System deps for PyTorch Geometric C extensions
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc g++ git curl \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+
+# PyG extensions for efficient neighbor sampling
+RUN pip install --no-cache-dir pyg-lib \
+    -f https://data.pyg.org/whl/torch-$(python -c "import torch; print(torch.__version__.split('+')[0])")+cpu.html \
+    || true   # non-fatal; NeighborLoader has a slow fallback
+
+COPY src/ ./src/
+COPY config.yaml .
+COPY .env.example .
+
+# Processed graphs and checkpoints are mounted at runtime
+ENV DATASET=elliptic
+ENV LOG_LEVEL=INFO
+
+EXPOSE 8000
+
+CMD ["uvicorn", "src.api.main:app", "--host", "0.0.0.0", "--port", "8000"]

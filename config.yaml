@@ -1,0 +1,106 @@
+project:
+  name: aurelius
+  version: 0.1.0
+
+data:
+  raw_dir: data/raw
+  processed_dir: data/processed
+  vectordb_dir: data/vectordb
+
+  elliptic:
+    classes_file: elliptic_txs_classes.csv
+    features_file: elliptic_txs_features.csv
+    edgelist_file: elliptic_txs_edgelist.csv
+    num_features: 166
+    num_classes: 3  # licit, illicit, unknown
+
+  ibm_aml:
+    transactions_file: HI-Small_Trans.csv
+
+graph:
+  builder:
+    self_loops: true
+    undirected: false
+    time_window_steps: 49  # Elliptic has 49 timesteps
+
+features:
+  pagerank_alpha: 0.85
+  centrality_types: [degree, betweenness, closeness]
+  embedding_dim: 64
+
+model:
+  gnn:
+    type: GATv2Conv
+    hidden_channels: 128
+    num_heads: 4
+    num_layers: 3
+    dropout: 0.3
+    out_channels: 2
+    jk_mode: cat
+    residual: true
+
+  xgboost:
+    n_estimators: 500
+    max_depth: 8
+    learning_rate: 0.05
+    subsample: 0.8
+    colsample_bytree: 0.8
+    eval_metric: aucpr
+    early_stopping_rounds: 50
+
+  training:
+    epochs: 200
+    lr: 0.001
+    weight_decay: 5.0e-4
+    patience: 20
+    batch_size: 2048
+    num_neighbors: [15, 10, 5]
+    class_weight_ratio: 10
+
+  contrastive:
+    method: dgi                # dgi or graphcl
+    projection_dim: 128
+    temperature: 0.5           # NT-Xent temperature (graphcl only)
+    node_drop_rate: 0.1
+    edge_perturb_rate: 0.1
+    feature_mask_rate: 0.2
+    pretrain_epochs: 100
+    pretrain_lr: 0.001
+
+  temporal:
+    memory_dim: 128
+    bptt_steps: 5              # truncated BPTT every K snapshots
+    temporal_dropout: 0.2
+
+  multitask:
+    tasks: [classification, link_prediction, degree]
+    use_uncertainty_weighting: true
+    initial_weights:
+      classification: 1.0
+      link_prediction: 0.5
+      degree: 0.3
+
+  adversarial:
+    epsilon: 0.01
+    alpha: 0.3                 # weight of adversarial loss
+    attack_steps: 3            # PGD steps
+    topology_budget: 0.05      # fraction of edges to perturb
+
+agent:
+  llm:
+    model_name: gemini-2.0-flash
+    temperature: 0.3
+    max_output_tokens: 4096
+  rag:
+    chunk_size: 1000
+    chunk_overlap: 200
+    top_k: 5
+    embedding_model: models/text-embedding-004
+
+api:
+  host: 0.0.0.0
+  port: 8000
+  cors_origins: ["http://localhost:5173"]
+
+frontend:
+  dev_port: 5173

@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python3 -m pytest tests/test_pipeline/test_temporal_train.py -v)",
+      "Bash(python3 -c \"from src.pipeline.evaluate import find_optimal_threshold, evaluate_model, get_node_probabilities, generate_evaluation_report; print\\(''evaluate.py OK''\\)\")",
+      "Bash(find /Users/devankittelson/Dev/Projects/Aurelius/src -type f -name \"*.py\" -exec wc -l {} +)",
+      "Bash(find /Users/devankittelson/Dev/Projects/Aurelius/finished -type f -name *.py)",
+      "Bash(find /Users/devankittelson/Dev/Projects/Aurelius/frontend -type f -name *.ts -o -name *.tsx)",
+      "Bash(find /Users/devankittelson/Dev/Projects/Aurelius/frontend/src -type f \\\\\\(-name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(wc -l /Users/devankittelson/Dev/Projects/Aurelius/finished/src/agents/*.py /Users/devankittelson/Dev/Projects/Aurelius/finished/src/api/*.py /Users/devankittelson/Dev/Projects/Aurelius/finished/src/api/routes/*.py)",
+      "Bash(find /Users/devankittelson/Dev/Projects/Aurelius/src -type f -name \"*.py\" -exec ls -lh {})",
+      "Read(//Users/devankittelson/Dev/Projects/Aurelius/**)",
+      "Read(//Users/devankittelson/.claude/projects/-Users-devankittelson/memory/**)",
+      "Bash(python3 -m pytest tests/test_agents/test_cluster_detector.py -v)"
+    ],
+    "additionalDirectories": [
+      "/Users/devankittelson/Dev/Projects/Aurelius"
+    ]
+  }
+}
